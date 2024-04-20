@@ -8,6 +8,11 @@ format: pdf
 
 ```{r read-data, message = F}
 
+library(skimr)
+
+library(ggplot2)
+library(dplyr)
+
 library(readr)
 ufc <- read_csv("data/ufc-fighters-statistics.csv")
 
@@ -56,7 +61,7 @@ https://www.euronews.com/business/2023/09/27/the-booming-billion-dollar-business
 
 **EDA**
 
-```{r ex-1, message - F}
+```{r ch-1, message - F}
 library(ggplot2)
 
 plot <- ggplot(ufc, aes(x = wins)) +
@@ -90,4 +95,43 @@ plot_reach <- ggplot(ufc, aes(x = reach_in_cm, y = wins)) +
                    title = "Relationship between Reach and Wins")
 print(plot_reach)
 
+```
+## Data Preparation
+
+```{r ch-2, message - F}
+ufc$win_ratio <- ufc$wins / (ufc$wins + ufc$losses + ufc$draws)
+
+print(head(ufc))
+
+skim(ufc)
+
+```
+## Choose Predictors
+
+```{r ch-3, message - F}
+# Select specified continuous columns
+selected_columns <- ufc %>%
+  select(wins, draws, height_cm, weight_in_kg, reach_in_cm, significant_strikes_landed_per_minute,
+         significant_striking_accuracy, significant_strikes_absorbed_per_minute,
+         significant_strike_defence, average_takedowns_landed_per_15_minutes,
+         takedown_accuracy, takedown_defense, average_submissions_attempted_per_15_minutes, win_ratio)
+
+# Compute the correlation matrix
+correlation_matrix <- cor(selected_columns, use = "complete.obs")  # Handles NA by excluding
+
+# Convert the correlation matrix to a long format for ggplot
+correlation_data <- as.data.frame(as.table(correlation_matrix))
+
+# Rename columns for clarity
+names(correlation_data) <- c("variable1", "variable2", "value")
+
+# Plotting the heatmap
+ggplot(correlation_data, aes(x = variable1, y = variable2, fill = value)) +
+  geom_tile() +  # This creates the heatmap tiles
+  geom_text(aes(label = sprintf("%.2f", value)), color = "black", size = 3) +  # Adds text labels
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, limit = c(-1,1), space = "Lab", name="Correlation") +
+  theme_minimal() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text.y = element_text(angle = 45, vjust = 1)) +  # Adjust text alignment if necessary
+  labs(title = "Heatmap of Specified Continuous Variables", x = "", y = "")
 ```
