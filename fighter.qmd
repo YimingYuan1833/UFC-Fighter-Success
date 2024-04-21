@@ -158,6 +158,32 @@ model1 <- lm(win_ratio ~ stance + average_takedowns_landed_per_15_minutes + sign
 summary(model1)
 
 ```
+**Categorical variable:**
+
+0.0435211 represents the difference in average win ratio for fighters with Orthodox stance, compared with fighters with Open stance, while holding the other predictors constant.
+
+-0.0893852 represents the difference in average win ratio for fighters with Sideways stance, compared with fighters with Open stance, while holding the other predictors constant.
+
+0.0484787 represents the difference in average win ratio for fighters with Southpaw stance, compared with fighters with Open stance, while holding the other predictors constant.
+
+0.0895293 represents the difference in average win ratio for fighters with Switch stance, compared with fighters with Open stance, while holding the other predictors constant.
+
+We notice that the p-value for Stance variables are all less than 0.05, and thus, there is insufficient evidence to suggest a linear relationship between fighter's stance and wins ratio at 0.05 significance level, while controlling for other predictors 
+
+
+
+**Continuous variable:**
+
+While holding the other predictors constant, when the average number of takedowns landed by the fighter per 15 minutes increases by 1 time, the average win ratio of the fighter will increase by 0.0113384.
+
+While holding the other predictors constant, when the significant striking accuracy increases by 1%, the average win ratio of the fighter will increase by 0.0017843.
+
+While holding the other predictors constant, when the average number of significant strikes landed by the fighter per minute increases by 1 time, the average win ratio of the fighter will increase by 0.0199915.
+
+While holding the other predictors constant, when the average number of significant strikes absorbed by the fighter per minute increases by 1 time, the average win ratio of the fighter will decrease by 0.0016777.
+
+While holding the other predictors constant, when the opponent's significant strikes that the fighter successfully defends increases by 1%, the average win ratio of the fighter will increase by 0.0009887.
+
 
 
 ```{r ch-5, message - F}
@@ -170,3 +196,7 @@ model2 <- glm(win_ratio_binary ~ stance + average_takedowns_landed_per_15_minute
 
 summary(model2)
 ```
+We impose a threshold of 0.5 for wins ration: when it's larger than 0.5, we consider it Satisfactory Performance, and when it's less than 0.5, we consider it Unsatisfactory Performance. 
+
+
+
