@@ -111,7 +111,7 @@ skim(ufc)
 ```{r ch-3, message - F}
 # Select specified continuous columns
 selected_columns <- ufc %>%
-  select(wins, draws, height_cm, weight_in_kg, reach_in_cm, significant_strikes_landed_per_minute,
+  select(height_cm, weight_in_kg, reach_in_cm, significant_strikes_landed_per_minute,
          significant_striking_accuracy, significant_strikes_absorbed_per_minute,
          significant_strike_defence, average_takedowns_landed_per_15_minutes,
          takedown_accuracy, takedown_defense, average_submissions_attempted_per_15_minutes, win_ratio)
@@ -132,6 +132,41 @@ ggplot(correlation_data, aes(x = variable1, y = variable2, fill = value)) +
   scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, limit = c(-1,1), space = "Lab", name="Correlation") +
   theme_minimal() + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.text.y = element_text(angle = 45, vjust = 1)) +  # Adjust text alignment if necessary
-  labs(title = "Heatmap of Specified Continuous Variables", x = "", y = "")
+        axis.text.y = element_text(angle = 45, vjust = 1))  # Adjust text alignment if necessary
+
+```
+
+Predictors:
+Stance (category)
+average_takendowns_landed_per_15 minutes
+Significant_striking_accuracy
+Significant_strikes_landed per_minute
+significant_strikes_absorbed_per_minute
+significant_strike_defence
+
+## Model Fitting
+
+```{r ch-4, message - F}
+
+ufc$stance <- as.factor(ufc$stance)
+
+model1 <- lm(win_ratio ~ stance + average_takedowns_landed_per_15_minutes + significant_striking_accuracy +
+            significant_strikes_landed_per_minute + significant_strikes_absorbed_per_minute + significant_strike_defence, 
+            data = ufc)
+
+
+summary(model1)
+
+```
+
+
+```{r ch-5, message - F}
+ufc$win_ratio_binary <- ifelse(ufc$win_ratio > 0.5, 1, 0)
+
+model2 <- glm(win_ratio_binary ~ stance + average_takedowns_landed_per_15_minutes + 
+                      significant_striking_accuracy + significant_strikes_landed_per_minute + 
+                      significant_strikes_absorbed_per_minute + significant_strike_defence, 
+                      family = binomial, data = ufc)
+
+summary(model2)
 ```
