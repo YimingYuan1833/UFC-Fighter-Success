@@ -6,7 +6,7 @@ format: pdf
 
 ## Read in the data
 
-```{r read-data, message = F}
+```{r read-data, message=FALSE}
 
 library(skimr)
 
@@ -14,6 +14,9 @@ library(ggplot2)
 library(dplyr)
 
 library(readr)
+
+library(MASS)
+
 ufc <- read_csv("data/ufc-fighters-statistics.csv")
 
 ```
@@ -99,7 +102,9 @@ print(plot_reach)
 ## Data Preparation
 
 ```{r ch-2, message - F}
+
 ufc$win_ratio <- ufc$wins / (ufc$wins + ufc$losses + ufc$draws)
+ufc$age <- as.integer(format(Sys.Date(), "%Y")) - as.integer(format(ufc$date_of_birth, "%Y"))
 
 print(head(ufc))
 
@@ -109,9 +114,9 @@ skim(ufc)
 ## Choose Predictors
 
 ```{r ch-3, message - F}
-# Select specified continuous columns
+
 selected_columns <- ufc %>%
-  select(height_cm, weight_in_kg, reach_in_cm, significant_strikes_landed_per_minute,
+  dplyr::select(age, height_cm, weight_in_kg, reach_in_cm, significant_strikes_landed_per_minute,
          significant_striking_accuracy, significant_strikes_absorbed_per_minute,
          significant_strike_defence, average_takedowns_landed_per_15_minutes,
          takedown_accuracy, takedown_defense, average_submissions_attempted_per_15_minutes, win_ratio)
@@ -125,18 +130,20 @@ correlation_data <- as.data.frame(as.table(correlation_matrix))
 # Rename columns for clarity
 names(correlation_data) <- c("variable1", "variable2", "value")
 
-# Plotting the heatmap
+# Plotting the heatmap with correlation coefficients
 ggplot(correlation_data, aes(x = variable1, y = variable2, fill = value)) +
   geom_tile() +  # This creates the heatmap tiles
   geom_text(aes(label = sprintf("%.2f", value)), color = "black", size = 3) +  # Adds text labels
   scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, limit = c(-1,1), space = "Lab", name="Correlation") +
   theme_minimal() + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        axis.text.y = element_text(angle = 45, vjust = 1))  # Adjust text alignment if necessary
+        axis.text.y = element_text(angle = 45, vjust = 1)) +  # Adjust text alignment if necessary
+  labs(title = "Heatmap of Specified Continuous Variables", x = "", y = "")
 
 ```
 
 Predictors:
+age
 Stance (category)
 average_takendowns_landed_per_15 minutes
 Significant_striking_accuracy
@@ -147,10 +154,10 @@ significant_strike_defence
 ## Model Fitting
 
 ```{r ch-4, message - F}
-
+#linear
 ufc$stance <- as.factor(ufc$stance)
 
-model1 <- lm(win_ratio ~ stance + average_takedowns_landed_per_15_minutes + significant_striking_accuracy +
+model1 <- lm(win_ratio ~ age + stance + average_takedowns_landed_per_15_minutes + significant_striking_accuracy +
             significant_strikes_landed_per_minute + significant_strikes_absorbed_per_minute + significant_strike_defence, 
             data = ufc)
 
@@ -187,9 +194,10 @@ While holding the other predictors constant, when the opponent's significant str
 
 
 ```{r ch-5, message - F}
+#logistic
 ufc$win_ratio_binary <- ifelse(ufc$win_ratio > 0.5, 1, 0)
 
-model2 <- glm(win_ratio_binary ~ stance + average_takedowns_landed_per_15_minutes + 
+model2 <- glm(win_ratio_binary ~ age + stance + average_takedowns_landed_per_15_minutes + 
                       significant_striking_accuracy + significant_strikes_landed_per_minute + 
                       significant_strikes_absorbed_per_minute + significant_strike_defence, 
                       family = binomial, data = ufc)
@@ -198,5 +206,19 @@ summary(model2)
 ```
 We impose a threshold of 0.5 for wins ration: when it's larger than 0.5, we consider it Satisfactory Performance, and when it's less than 0.5, we consider it Unsatisfactory Performance. 
 
+```{r ch-6, message - F}
+#ordinal classified by age
 
+ufc$win_ratio_group <- cut(ufc$win_ratio,
+                                breaks = c(0, 0.33, 0.66, 1),
+                                labels = c("Low", "Medium", "High"),
+                                include.lowest = TRUE)
+ufc$win_ratio_group <- ordered(ufc$win_ratio_group)
 
+model3 <- polr(win_ratio_group ~ age + stance + average_takedowns_landed_per_15_minutes + 
+                      significant_striking_accuracy + significant_strikes_landed_per_minute + 
+                      significant_strikes_absorbed_per_minute + significant_strike_defence,
+               data = ufc)
+summary(model3)
+
+```
