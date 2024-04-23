@@ -192,21 +192,35 @@ While holding the other predictors constant, when the average number of signific
 While holding the other predictors constant, when the opponent's significant strikes that the fighter successfully defends increases by 1%, the average win ratio of the fighter will increase by 0.0009887.
 
 
-
 ```{r ch-5, message - F}
+#linear & transformation
+ufc <- ufc %>%
+  filter(significant_strike_defence > 0) 
+
+model2 <- lm(win_ratio ~ age + stance + average_takedowns_landed_per_15_minutes + significant_striking_accuracy +
+               significant_strikes_landed_per_minute + significant_strikes_absorbed_per_minute +
+              log(significant_strike_defence), 
+            data = ufc)
+
+
+summary(model2)
+```
+
+
+```{r ch-6, message - F}
 #logistic
 ufc$win_ratio_binary <- ifelse(ufc$win_ratio > 0.5, 1, 0)
 
-model2 <- glm(win_ratio_binary ~ age + stance + average_takedowns_landed_per_15_minutes + 
+model3 <- glm(win_ratio_binary ~ age + stance + average_takedowns_landed_per_15_minutes + 
                       significant_striking_accuracy + significant_strikes_landed_per_minute + 
                       significant_strikes_absorbed_per_minute + significant_strike_defence, 
                       family = binomial, data = ufc)
 
-summary(model2)
+summary(model3)
 ```
 We impose a threshold of 0.5 for wins ration: when it's larger than 0.5, we consider it Satisfactory Performance, and when it's less than 0.5, we consider it Unsatisfactory Performance. 
 
-```{r ch-6, message - F}
+```{r ch-7, message - F}
 #ordinal classified by age
 
 ufc$win_ratio_group <- cut(ufc$win_ratio,
@@ -215,10 +229,10 @@ ufc$win_ratio_group <- cut(ufc$win_ratio,
                                 include.lowest = TRUE)
 ufc$win_ratio_group <- ordered(ufc$win_ratio_group)
 
-model3 <- polr(win_ratio_group ~ age + stance + average_takedowns_landed_per_15_minutes + 
+model4 <- polr(win_ratio_group ~ age + stance + average_takedowns_landed_per_15_minutes + 
                       significant_striking_accuracy + significant_strikes_landed_per_minute + 
                       significant_strikes_absorbed_per_minute + significant_strike_defence,
                data = ufc)
-summary(model3)
+summary(model4)
 
 ```
