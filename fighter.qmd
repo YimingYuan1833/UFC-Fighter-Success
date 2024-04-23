@@ -22,7 +22,7 @@ ufc <- read_csv("data/ufc-fighters-statistics.csv")
 ```
 
 ## Introduction and data
-Around 300 million individuals worldwide identify themselves as fans of Mixed Martial Arts (MMA), with its popularity peaking in nations such as the United States, the United Kingdom, Brazil, Singapore, and China. The Ultimate Fighting Championship (UFC) is the premier organization in the MMA world. Our motivation is to research on what contributes to the fighters' performance. Thus, the research questions are: How largely do the innate physical attributes affect fighters' performance? What's the most effective stance? How does the way fighters stroke (speed/accuracy/amount/defence success) influence their performance? 可加其他问题
+Around 300 million individuals worldwide identify themselves as fans of Mixed Martial Arts (MMA), with its popularity peaking in nations such as the United States, the United Kingdom, Brazil, Singapore, and China. The Ultimate Fighting Championship (UFC) is the premier organization in the MMA world. Our motivation is to research on what contributes to the fighters' performance. Thus, the research questions are: How largely do the innate physical attributes affect fighters' performance? What's the most effective stance? How does the way fighters stroke (speed/accuracy/amount/defense success) influence their performance? 
 
 Today's data are UFC fighter statistics including:
 
@@ -236,3 +236,16 @@ model4 <- polr(win_ratio_group ~ age + stance + average_takedowns_landed_per_15_
 summary(model4)
 
 ```
+```{r ch-8, message - F}
+#interaction between age & striking accuracy and  takedowns landed
+ufc$stance <- as.factor(ufc$stance)
+
+model5 <- lm(win_ratio ~ age + stance + average_takedowns_landed_per_15_minutes + significant_striking_accuracy +
+            significant_strikes_landed_per_minute + significant_strikes_absorbed_per_minute + significant_strike_defence + age*average_takedowns_landed_per_15_minutes + age*significant_striking_accuracy + age*significant_strikes_absorbed_per_minute + age*significant_strike_defence, 
+            data = ufc)
+
+
+summary(model5)
+
+```
+
