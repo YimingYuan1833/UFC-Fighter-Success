@@ -221,7 +221,7 @@ summary(model3)
 We impose a threshold of 0.5 for wins ration: when it's larger than 0.5, we consider it Satisfactory Performance, and when it's less than 0.5, we consider it Unsatisfactory Performance. 
 
 ```{r ch-7, message - F}
-#ordinal classified by age
+#ordinal classified by win ratio
 
 ufc$win_ratio_group <- cut(ufc$win_ratio,
                                 breaks = c(0, 0.33, 0.66, 1),
@@ -236,6 +236,8 @@ model4 <- polr(win_ratio_group ~ age + stance + average_takedowns_landed_per_15_
 summary(model4)
 
 ```
+
+
 ```{r ch-8, message - F}
 #interaction between age & striking accuracy and  takedowns landed
 ufc$stance <- as.factor(ufc$stance)
