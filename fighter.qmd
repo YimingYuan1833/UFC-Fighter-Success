@@ -61,7 +61,7 @@ https://www.kaggle.com/datasets/aaronfriasr/ufc-fighters-statistics?resource=dow
 https://www.euronews.com/business/2023/09/27/the-booming-billion-dollar-business-of-combat-sports
 
 
-## Data Preparation
+*Data Preparation*
 
 ```{r ch-1, message = F, warning = F, echo=F}
 
@@ -70,6 +70,7 @@ ufc$age <- as.integer(format(Sys.Date(), "%Y")) - as.integer(format(ufc$date_of_
 
 print(head(ufc))
 ```
+
 ## Methodology
 
 1. Predictor selection based on correlation matrix:
@@ -81,7 +82,9 @@ We selected 7 predictors that demonstrated the highest correlation coefficients 
 
 We first fit a linear model with with interaction terms and and observed an R-squared value of 0.29, indicating suboptimal predictive performance. Then we change to fitting an ordinal model. We categorize win_ratio into 0-0.33, 0.33-0.67, and 0.67-1, and label them as "Low", "Medium", "High". By creating a confusion matrix, we calculate the test accuracy of 0.71, which concludes that the ordinal model can make more accurate predictions.
 
-## Choose Predictors
+## Results
+
+1.*Choose Predictors*
 
 ```{r ch-2,message = F, warning = F, echo=F}
 
@@ -113,16 +116,28 @@ ggplot(correlation_data, aes(x = variable1, y = variable2, fill = value)) +
 
 ```
 
+In our analysis, we utilized a heatmap to visually explore and identify the variables most closely associated with fighters' win ratios. The heatmap allowed us to systematically observe the strength and patterns of correlation between various predictors and the win ratio. By presenting the data in this format, we were able to discern which factors are most likely to influence a fighter's likelihood of winning, thereby providing a foundation for more targeted, in-depth statistical analysis. 
+
 Predictors:
+
 age
+
 Stance (category)
+
 average_takendowns_landed_per_15_minutes
+
 Significant_striking_accuracy
+
 Significant_strikes_landed_per_minute
+
 significant_strikes_absorbed_per_minute
+
 significant_strike_defence
 
-**EDA**
+
+2. *EDA*
+
+We concentrated on the EDA of the response variable to ascertain its distribution characteristics.
 
 ```{r ch-3, message = F, warning = F, echo=F}
 
@@ -152,47 +167,9 @@ p <- ggplot(melted_ufc, aes(x = Statistic, y = Value, fill = Statistic)) +
 print(p)
 ```
 
-## Model Fitting
+3. *Model Fitting*
 
-```{r ch-4, message = F, warning = F, echo=F}
-#linear
-ufc$stance <- as.factor(ufc$stance)
-
-model1 <- lm(win_ratio ~ age + stance + average_takedowns_landed_per_15_minutes + significant_striking_accuracy +
-            significant_strikes_landed_per_minute + significant_strikes_absorbed_per_minute + significant_strike_defence, 
-            data = ufc)
-
-
-summary(model1)
-
-```
-**Categorical variable:**
-
-0.0435211 represents the difference in average win ratio for fighters with Orthodox stance, compared with fighters with Open stance, while holding the other predictors constant.
-
--0.0893852 represents the difference in average win ratio for fighters with Sideways stance, compared with fighters with Open stance, while holding the other predictors constant.
-
-0.0484787 represents the difference in average win ratio for fighters with Southpaw stance, compared with fighters with Open stance, while holding the other predictors constant.
-
-0.0895293 represents the difference in average win ratio for fighters with Switch stance, compared with fighters with Open stance, while holding the other predictors constant.
-
-We notice that the p-value for Stance variables are all less than 0.05, and thus, there is insufficient evidence to suggest a linear relationship between fighter's stance and wins ratio at 0.05 significance level, while controlling for other predictors 
-
-
-
-**Continuous variable:**
-
-While holding the other predictors constant, when the average number of takedowns landed by the fighter per 15 minutes increases by 1 time, the average win ratio of the fighter will increase by 0.0113384.
-
-While holding the other predictors constant, when the significant striking accuracy increases by 1%, the average win ratio of the fighter will increase by 0.0017843.
-
-While holding the other predictors constant, when the average number of significant strikes landed by the fighter per minute increases by 1 time, the average win ratio of the fighter will increase by 0.0199915.
-
-While holding the other predictors constant, when the average number of significant strikes absorbed by the fighter per minute increases by 1 time, the average win ratio of the fighter will decrease by 0.0016777.
-
-While holding the other predictors constant, when the opponent's significant strikes that the fighter successfully defends increases by 1%, the average win ratio of the fighter will increase by 0.0009887.
-
-
+Our analysis applied an ordinal logistic regression model to explore the relationships between fighters' win ratio groups (categorized as Low, Medium, and High) and a set of predictors.
 
 ```{r ch-5, message = F, warning = F, echo = F}
 #ordinal classified by win
@@ -210,6 +187,7 @@ model4 <- polr(win_ratio_group ~ age + stance + average_takedowns_landed_per_15_
 summary(model4)
 
 ```
+
 ```{r ch-6, message = F, warning = F, echo = F}
 #prediction accuracy
 library(MASS) 
@@ -227,6 +205,32 @@ print(paste("Accuracy: ", accuracy))
 
 
 ```
+The confusion matrix shows the distribution of actual versus predicted group memberships. The model demonstrates a substantial predictive accuracy of approximately 70.93%, primarily distinguishing well in the higher win ratio groups but showing some limitations in accurately classifying the lower groups.
+
+
+Thus, it is feasible to find more influential predictor by ordinal model.
+
+
+Continuous Variable:
+
+- Age shows a negative coefficient (-0.115), indicating that as fighters age, their likelihood of being in a higher win ratio group decreases significantly.
+
+- Average takedowns landed per 15 minutes has a positive coefficient (0.155), suggesting that higher rates of takedowns landed are associated with being in a higher win ratio group.
+
+- Significant striking accuracy has a positive effect (0.012) on the win ratio group, indicating that more accurate strikers tend to be in higher win ratio groups. However, it has a small effect.
+
+- Significant strikes landed per minute also positively affects the win ratio group (coefficient = 0.068), suggesting that fighters who land more strikes per minute tend to have better win ratios.
+
+- Significant strikes absorbed per minute has a negative coefficient (-0.053), indicating that fighters absorbing more strikes per minute are likely to belong to lower win ratio groups.
+
+- Significant strike defence shows a negligible negative coefficient, suggesting minimal impact on win ratio groups.
+
+Categorical variable:
+
+Sideways (coef = 4.3460381):
+This stance has a significantly positive coefficient, indicating that fighters adopting a Sideways stance have a higher likelihood of being in a higher win ratio group compared to the reference category. However, the statistical significance is marginal (t-value close to 1), thereby it may not be robust across different samples.
+
+Additionally, the coefficients for other stances are all negative, while the t-value indicates that their effect is not statistically significant.
 
 ```{r ch-7, message = F, warning = F, echo=F}
 #interaction between age & striking accuracy and  takedowns landed
@@ -240,4 +244,4 @@ model5 <- lm(win_ratio ~ age + stance + average_takedowns_landed_per_15_minutes 
 summary(model5)
 
 ```
-
+We also fitted a linear model with with interaction terms and and observed an R-squared value of 0.29, indicating suboptimal predictive performance.
