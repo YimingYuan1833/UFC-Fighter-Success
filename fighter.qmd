@@ -6,7 +6,7 @@ format: pdf
 
 ## Read in the data
 
-```{r read-data, message=FALSE}
+```{r read-data, message=F, warning = F, echo=F}
 
 library(skimr)
 library(ggplot2)
@@ -232,6 +232,7 @@ This stance has a significantly positive coefficient, indicating that fighters a
 
 Additionally, the coefficients for other stances are all negative, while the t-value indicates that their effect is not statistically significant.
 
+4. *Linear model for comparison*
 ```{r ch-7, message = F, warning = F, echo=F}
 #interaction between age & striking accuracy and  takedowns landed
 ufc$stance <- as.factor(ufc$stance)
