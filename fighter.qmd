@@ -246,3 +246,18 @@ summary(model5)
 
 ```
 We also fitted a linear model with with interaction terms and and observed an R-squared value of 0.29, indicating suboptimal predictive performance.
+
+## Discussion
+
+In terms of how fighters improve their performance, we can conclude that they should put more effort into improving their rates of takedowns landed, striking accuracy, striking numbers, and strikes absorbed, because these factors are predicted to be more closely associated with wins ratio. In contrast, which stance they choose and the significant strike defence do not contribute much to improve their wins ratio. 
+
+As for limitations, the ordinal model may oversimplify the complex dynamics of MMA fights and fail to capture all relevant predictors. To improve future analyses, we could consider incorporating additional variables such as fighters' training regimens, injury history, and psychological factors. Additionally, since we only categorize the wins ratio into three groups, this may simplif the prediction task and potentially lose granularity in the data, which affects the model's ability to accurately predict the win ratios.
+
+
+
+
+
+
+
+
+
