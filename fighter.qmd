@@ -19,7 +19,7 @@ ufc <- read_csv("data/ufc-fighters-statistics.csv")
 ```
 
 ## Introduction and data
-Around 300 million individuals worldwide identify themselves as fans of Mixed Martial Arts (MMA), with its popularity peaking in nations such as the United States, the United Kingdom, Brazil, Singapore, and China. The Ultimate Fighting Championship (UFC) is the premier organization in the MMA world. Our motivation is to research on what contributes to the fighters' performance. Thus, the research questions are: How largely do the innate physical attributes affect fighters' performance? What's the most effective stance? How does the way fighters stroke (speed/accuracy/amount/defense success) influence their performance? 
+Around 300 million individuals worldwide identify themselves as fans of Mixed Martial Arts (MMA), with its popularity peaking in nations such as the United States, the United Kingdom, Brazil, Singapore, and China. The Ultimate Fighting Championship (UFC) is the premier organization in the MMA world. Our motivation is to research on what contributes to the fighters' performance. Thus, the research questions is: Which model we consider effective in predicting fighters' winning ratio? How fighters improve their performance?
 
 Today's data are UFC fighter statistics including:
 
@@ -224,7 +224,7 @@ print(paste("Accuracy: ", accuracy))
 
 ```
 
-```{r ch-6, message = F, warning = F, echo=F}
+```{r ch-7, message = F, warning = F, echo=F}
 #interaction between age & striking accuracy and  takedowns landed
 ufc$stance <- as.factor(ufc$stance)
 
