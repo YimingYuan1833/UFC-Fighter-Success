@@ -134,7 +134,8 @@ p <- ggplot(melted_ufc, aes(x = Statistic, y = Value, fill = Statistic)) +
   geom_boxplot() +
   scale_fill_brewer(palette = "Paired") + # This uses color brewer palettes for fill colors
   theme_light() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 4),
+        plot.title = element_text(size = 10)) + 
   labs(title = 'Colorful Box Plots of Fighting Statistics', 
        x = 'Statistic', 
        y = 'Value')
