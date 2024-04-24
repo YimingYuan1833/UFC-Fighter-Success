@@ -206,7 +206,23 @@ model4 <- polr(win_ratio_group ~ age + stance + average_takedowns_landed_per_15_
 summary(model4)
 
 ```
+```{r ch-6, message = F, warning = F, echo = F}
+#prediction accuracy
+library(MASS) 
+library(caret) 
 
+ufc$predicted <- predict(model4, newdata = ufc, type = "class")
+
+# Creating a confusion matrix
+conf_matrix <- table(Actual = ufc$win_ratio_group, Predicted = ufc$predicted)
+print(conf_matrix)
+
+# Calculating the accuracy from the confusion matrix
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
+print(paste("Accuracy: ", accuracy))
+
+
+```
 
 ```{r ch-6, message = F, warning = F, echo=F}
 #interaction between age & striking accuracy and  takedowns landed
