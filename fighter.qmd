@@ -69,10 +69,18 @@ ufc$win_ratio <- ufc$wins / (ufc$wins + ufc$losses + ufc$draws)
 ufc$age <- as.integer(format(Sys.Date(), "%Y")) - as.integer(format(ufc$date_of_birth, "%Y"))
 
 print(head(ufc))
-
-skim(ufc)
-
 ```
+## Methodology
+
+1. Predictor selection based on correlation matrix:
+
+We selected 7 predictors that demonstrated the highest correlation coefficients with the wins ratio for inclusion in the model. They are fighter's age, their stance, the average number of takedowns landed by the fighter per 15 minutes, their striking accuracy, the average number of significant strikes landed by the fighter per minute, the average number of significant strikes absorbed by the fighter per minutem, and the percentage of opponent's significant strikes that the fighter successfully defends.
+
+
+2. Selection of ordinal model by measurement of prediction accuracy:
+
+We first fit a linear model with with interaction terms and and observed an R-squared value of 0.29, indicating suboptimal predictive performance. Then we change to fitting an ordinal model. We categorize win_ratio into 0-0.33, 0.33-0.67, and 0.67-1, and label them as "Low", "Medium", "High". By creating a confusion matrix, we calculate the test accuracy of 0.71, which concludes that the ordinal model can make more accurate predictions.
+
 ## Choose Predictors
 
 ```{r ch-2,message = F, warning = F, echo=F}
