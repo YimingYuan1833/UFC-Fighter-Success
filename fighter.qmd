@@ -14,6 +14,7 @@ library(dplyr)
 library(readr)
 library(MASS)
 
+
 ufc <- read_csv("data/ufc-fighters-statistics.csv")
 
 ```
@@ -59,46 +60,10 @@ https://www.kaggle.com/datasets/aaronfriasr/ufc-fighters-statistics?resource=dow
 
 https://www.euronews.com/business/2023/09/27/the-booming-billion-dollar-business-of-combat-sports
 
-**EDA**
 
-```{r ch-1, message = F, warning = F, echo=F}
-library(ggplot2)
-
-plot <- ggplot(ufc, aes(x = wins)) +
-        geom_histogram(binwidth = 1, fill = "skyblue", color = "white") +
-        geom_density(alpha = 0.5, fill = "skyblue") +
-        labs(x = "Number of Wins", y = "Frequency/Density",
-             title = "Distribution of Wins in Fighter Careers") +
-        theme_minimal() +
-        theme(panel.grid = element_blank())  
-
-print(plot)
-
-
-plot_height <- ggplot(ufc, aes(x = height_cm, y = wins)) +
-               geom_point(color = "blue") +
-               labs(x = "Height (cm)", y = "Wins", 
-                    title = "Relationship between Height and Wins")
-
-print(plot_height)
-
-plot_weight <- ggplot(ufc, aes(x = weight_in_kg, y = wins)) +
-               geom_point(color = "green") +
-               labs(x = "Height (cm)", y = "Wins", 
-                    title = "Relationship between Height and Wins")
-
-print(plot_weight)
-
-plot_reach <- ggplot(ufc, aes(x = reach_in_cm, y = wins)) +
-              geom_point(color = "red") +
-              labs(x = "Reach (cm)", y = "Wins", 
-                   title = "Relationship between Reach and Wins")
-print(plot_reach)
-
-```
 ## Data Preparation
 
-```{r ch-2, message = F, warning = F, echo=F}
+```{r ch-1, message = F, warning = F, echo=F}
 
 ufc$win_ratio <- ufc$wins / (ufc$wins + ufc$losses + ufc$draws)
 ufc$age <- as.integer(format(Sys.Date(), "%Y")) - as.integer(format(ufc$date_of_birth, "%Y"))
@@ -110,7 +75,7 @@ skim(ufc)
 ```
 ## Choose Predictors
 
-```{r ch-3,message = F, warning = F, echo=F}
+```{r ch-2,message = F, warning = F, echo=F}
 
 selected_columns <- ufc %>%
   dplyr::select(age, height_cm, weight_in_kg, reach_in_cm, significant_strikes_landed_per_minute,
@@ -142,11 +107,40 @@ ggplot(correlation_data, aes(x = variable1, y = variable2, fill = value)) +
 Predictors:
 age
 Stance (category)
-average_takendowns_landed_per_15 minutes
+average_takendowns_landed_per_15_minutes
 Significant_striking_accuracy
-Significant_strikes_landed per_minute
+Significant_strikes_landed_per_minute
 significant_strikes_absorbed_per_minute
 significant_strike_defence
+
+**EDA**
+
+```{r ch-3, message = F, warning = F, echo=F}
+
+columns_to_plot <- c('average_takedowns_landed_per_15_minutes', 
+                     'significant_striking_accuracy',
+                     'significant_strikes_landed_per_minute', 
+                     'significant_strikes_absorbed_per_minute',
+                     'significant_strike_defence')
+library(reshape2)
+# Melt the data
+melted_ufc <- melt(ufc[, columns_to_plot], 
+                   variable.name = 'Statistic', 
+                   value.name = 'Value')
+
+
+p <- ggplot(melted_ufc, aes(x = Statistic, y = Value, fill = Statistic)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Paired") + # This uses color brewer palettes for fill colors
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(title = 'Colorful Box Plots of Fighting Statistics', 
+       x = 'Statistic', 
+       y = 'Value')
+
+# Print the plot
+print(p)
+```
 
 ## Model Fitting
 
