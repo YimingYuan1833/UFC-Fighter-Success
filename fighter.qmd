@@ -14,45 +14,51 @@ library(dplyr)
 library(readr)
 library(MASS)
 
-
 ufc <- read_csv("data/ufc-fighters-statistics.csv")
+
+# new variables 
+ufc$win_ratio <- ufc$wins / (ufc$wins + ufc$losses + ufc$draws)
+ufc$age <- as.integer(format(Sys.Date(), "%Y")) - as.integer(format(ufc$date_of_birth, "%Y"))
 
 ```
 
 ## Introduction and data
-Around 300 million individuals worldwide identify themselves as fans of Mixed Martial Arts (MMA), with its popularity peaking in nations such as the United States, the United Kingdom, Brazil, Singapore, and China. The Ultimate Fighting Championship (UFC) is the premier organization in the MMA world. Our motivation is to research on what contributes to the fighters' performance. Thus, the research questions is: Which model we consider effective in predicting fighters' winning ratio? How fighters improve their performance?
 
-Today's data are UFC fighter statistics including:
+**Questions: In what ways can MMA fighters improve their performance?**
 
-**wins:** The number of wins the fighter has in their career.
+Around 300 million individuals worldwide identify themselves as fans of Mixed Martial Arts (MMA), with its popularity peaking in nations such as the United States, the United Kingdom, Brazil, Singapore, and China. The Ultimate Fighting Championship (UFC) is the premier organization in the MMA world. In the dynamic landscape of MMA, quantifying fighter performance is essential for both athletes and analysts. Our objective is to reveal the significance and implications of that factors that contribute to the fighters' performance. 
 
-**draws:** The number of draws the fighter has in their career.
+Today's data comes from UFC fighter statistics collected in 2024, encompassing various dimensions of fighter performance results and parameters. **wins**, **losses** and **draws** represent the number of a fighter's victories, dogfalls and failures throughout their career. **height_cm**, **weight_in_kg** and **reach_in_cm** quantifies fighters physical attributes. **stance** is a categorical variable including Orthodox/Southpaw/Switch, which highlights fighters' preferred combat orientation. Performance metrics such as **significant_strikes_landed_per_minute** and **significant_striking_accuracy** record fighters' precision, timing, and offensive capabilities, while **significant_strikes_absorbed_per_minute** and **significant_strike_defence** quantify their defensive skills. **takedown_accuracy** and **average_takedowns_landed_per_15_minutes** assess fighters' proficiency in executing takedowns, while **takedown_defense** shows their ability to counter opponents' takedown attempts. Lastly, **average_submissions_attempted_per_15_minutes** measures fighters' inclination towards submission-based tactics, reflecting their grappling proficiency.
 
-**height_cm:** The height of the fighter in centimeters.
+We add two new variables: **win_ratio** is calculated as the ratio of wins to the sum of wins, draws, and losses, offering a measure of a fighter's success rate; and **age** is derived from fighters' date_of_birth statistics, providing insight into the fighters' maturity and experience within the competitive landscape. 
 
-**weight_in_kg:** The weight of the fighter in kilograms.
+Figure 1. visualizes the distribution of fighters' striking and takedowns metrics.
+```{r ch-1, message = F, warning = F, echo=F}
 
-**reach_in_cm:** The reach of the fighter in centimeters.
+columns_to_plot <- c('average_takedowns_landed_per_15_minutes', 
+                     'significant_striking_accuracy',
+                     'significant_strikes_landed_per_minute', 
+                     'significant_strikes_absorbed_per_minute',
+                     'significant_strike_defence')
+library(reshape2)
+# Melt the data
+melted_ufc <- melt(ufc[, columns_to_plot], 
+                   variable.name = 'Statistic', 
+                   value.name = 'Value')
 
-**stance:** The fighting stance of the fighter (Orthodox/Southpaw/Switch).
 
-**significant_strikes_landed_per_minute:** The average number of significant strikes landed by the fighter per minute.
+p <- ggplot(melted_ufc, aes(x = Statistic, y = Value, fill = Statistic)) +
+  geom_boxplot() +
+  scale_fill_brewer(palette = "Paired") + # This uses color brewer palettes for fill colors
+  theme_light() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 4),
+        plot.title = element_text(size = 10)) + 
+  labs(title = 'Figure 1. Box Plots of Fighting Statistics', 
+       x = 'Performance Statistic', 
+       y = 'Value')
 
-**significant_striking_accuracy:** The percentage of significant strikes that land successfully for the fighter.
-
-**significant_strikes_absorbed_per_minute:** The average number of significant strikes absorbed by the fighter per minute.
-
-**significant_strike_defence:** The percentage of opponent's significant strikes that the fighter successfully defends.
-
-**average_takedowns_landed_per_15_minutes:** The average number of takedowns landed by the fighter per 15 minutes.
-
-**takedown_accuracy:** The percentage of takedown attempts that are successful for the fighter.
-
-**takedown_defense:** The percentage of opponent's takedown attempts that the fighter successfully defends.
-
-**average_submissions_attempted_per_15_minutes:** The average number of submission attempts made by the fighter per 15 minutes.
-
-Our response variable is wins, predictors are 
+print(p)
+```
 
 sources:
 
@@ -60,31 +66,13 @@ https://www.kaggle.com/datasets/aaronfriasr/ufc-fighters-statistics?resource=dow
 
 https://www.euronews.com/business/2023/09/27/the-booming-billion-dollar-business-of-combat-sports
 
-
-*Data Preparation*
-
-```{r ch-1, message = F, warning = F, echo=F}
-
-ufc$win_ratio <- ufc$wins / (ufc$wins + ufc$losses + ufc$draws)
-ufc$age <- as.integer(format(Sys.Date(), "%Y")) - as.integer(format(ufc$date_of_birth, "%Y"))
-
-print(head(ufc))
-```
-
 ## Methodology
 
-1. Predictor selection based on correlation matrix:
-
-We selected 7 predictors that demonstrated the highest correlation coefficients with the wins ratio for inclusion in the model. They are fighter's age, their stance, the average number of takedowns landed by the fighter per 15 minutes, their striking accuracy, the average number of significant strikes landed by the fighter per minute, the average number of significant strikes absorbed by the fighter per minutem, and the percentage of opponent's significant strikes that the fighter successfully defends.
-
-
-2. Selection of ordinal model by measurement of prediction accuracy:
-
-We first fit a linear model with with interaction terms and and observed an R-squared value of 0.29, indicating suboptimal predictive performance. Then we change to fitting an ordinal model. We categorize win_ratio into 0-0.33, 0.33-0.67, and 0.67-1, and label them as "Low", "Medium", "High". By creating a confusion matrix, we calculate the test accuracy of 0.71, which concludes that the ordinal model can make more accurate predictions.
-
-## Results
-
-1.*Choose Predictors*
+**Predictor selection:** We utilized a heatmap to visually explore and identify the variables most closely associated with fighters' win_ratio. The heatmap allowed us to  observe the strength and patterns of correlation between various predictors and the wins_ratio. Hence, we selected 7 predictors that demonstrated the highest correlation coefficients with the win_ratio for inclusion in the model, and they are Age,Stance,Average_takendowns_landed_per_15_minutes,
+Significant_striking_accuracy,
+Significant_strikes_landed_per_minute,
+Significant_strikes_absorbed_per_minute,
+Significant_strike_defence. 
 
 ```{r ch-2,message = F, warning = F, echo=F}
 
@@ -116,60 +104,10 @@ ggplot(correlation_data, aes(x = variable1, y = variable2, fill = value)) +
 
 ```
 
-In our analysis, we utilized a heatmap to visually explore and identify the variables most closely associated with fighters' win ratios. The heatmap allowed us to systematically observe the strength and patterns of correlation between various predictors and the win ratio. By presenting the data in this format, we were able to discern which factors are most likely to influence a fighter's likelihood of winning, thereby providing a foundation for more targeted, in-depth statistical analysis. 
+**Ordinal regression model selection:** We first utilize a linear model with with interaction terms and and observed an R-squared value of 0.29, indicating suboptimal predictive performance. Then we fit an ordinal model and test its accuracy. Specifically, the response variable win_ratio is categorized into 0-0.33, 0.33-0.67, and 0.67-1, and labelled as "Low", "Medium", "High" respectively. Our analysis explore the relationships between fighters' win_ratio groups (Low, Medium, and High) and a set of predictors. 
 
-Predictors:
+By creating a confusion matrix that shows the distribution of actual versus predicted group memberships, we find that the test accuracy of this ordinal model is 0.71. Thus, the ordinal model can make more accurate predictions and it is feasible to find more influential predictor by ordinal model.
 
-age
-
-Stance (category)
-
-average_takendowns_landed_per_15_minutes
-
-Significant_striking_accuracy
-
-Significant_strikes_landed_per_minute
-
-significant_strikes_absorbed_per_minute
-
-significant_strike_defence
-
-
-2. *EDA*
-
-We concentrated on the EDA of the response variable to ascertain its distribution characteristics.
-
-```{r ch-3, message = F, warning = F, echo=F}
-
-columns_to_plot <- c('average_takedowns_landed_per_15_minutes', 
-                     'significant_striking_accuracy',
-                     'significant_strikes_landed_per_minute', 
-                     'significant_strikes_absorbed_per_minute',
-                     'significant_strike_defence')
-library(reshape2)
-# Melt the data
-melted_ufc <- melt(ufc[, columns_to_plot], 
-                   variable.name = 'Statistic', 
-                   value.name = 'Value')
-
-
-p <- ggplot(melted_ufc, aes(x = Statistic, y = Value, fill = Statistic)) +
-  geom_boxplot() +
-  scale_fill_brewer(palette = "Paired") + # This uses color brewer palettes for fill colors
-  theme_light() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 4),
-        plot.title = element_text(size = 10)) + 
-  labs(title = 'Colorful Box Plots of Fighting Statistics', 
-       x = 'Statistic', 
-       y = 'Value')
-
-# Print the plot
-print(p)
-```
-
-3. *Model Fitting*
-
-Our analysis applied an ordinal logistic regression model to explore the relationships between fighters' win ratio groups (categorized as Low, Medium, and High) and a set of predictors.
 
 ```{r ch-5, message = F, warning = F, echo = F}
 #ordinal classified by win
@@ -205,11 +143,9 @@ print(paste("Accuracy: ", accuracy))
 
 
 ```
-The confusion matrix shows the distribution of actual versus predicted group memberships. The model demonstrates a substantial predictive accuracy of approximately 70.93%, primarily distinguishing well in the higher win ratio groups but showing some limitations in accurately classifying the lower groups.
 
 
-Thus, it is feasible to find more influential predictor by ordinal model.
-
+## Results
 
 Continuous Variable:
 
@@ -240,7 +176,6 @@ ufc$stance <- as.factor(ufc$stance)
 model5 <- lm(win_ratio ~ age + stance + average_takedowns_landed_per_15_minutes + significant_striking_accuracy +
             significant_strikes_landed_per_minute + significant_strikes_absorbed_per_minute + significant_strike_defence + age*average_takedowns_landed_per_15_minutes + age*significant_striking_accuracy + age*significant_strikes_absorbed_per_minute + age*significant_strike_defence, 
             data = ufc)
-
 
 summary(model5)
 
