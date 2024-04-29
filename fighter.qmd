@@ -110,7 +110,7 @@ By creating a confusion matrix that shows the distribution of actual versus pred
 
 
 ```{r ch-5, message = F, warning = F, echo = F}
-#ordinal classified by win
+#ordinal classified by win_ratio
 
 ufc$win_ratio_group <- cut(ufc$win_ratio,
                                 breaks = c(0, 0.33, 0.66, 1),
@@ -122,7 +122,6 @@ model4 <- polr(win_ratio_group ~ age + stance + average_takedowns_landed_per_15_
                       significant_striking_accuracy + significant_strikes_landed_per_minute + 
                       significant_strikes_absorbed_per_minute + significant_strike_defence,
                data = ufc)
-summary(model4)
 
 ```
 
