@@ -23,9 +23,8 @@ ufc$age <- as.integer(format(Sys.Date(), "%Y")) - as.integer(format(ufc$date_of_
 
 ## Introduction and data
 
-**Questions: In what ways can MMA fighters improve their performance?**
 
-Around 300 million individuals worldwide identify themselves as fans of Mixed Martial Arts (MMA), with its popularity peaking in nations such as the United States, the United Kingdom, Brazil, Singapore, and China. The Ultimate Fighting Championship (UFC) is the premier organization in the MMA world. In the dynamic landscape of MMA, quantifying fighter performance is essential for both athletes and analysts. Our objective is to reveal the significance and implications of that factors that contribute to the fighters' performance.
+Around 300 million individuals worldwide identify themselves as fans of Mixed Martial Arts (MMA), with its popularity peaking in nations such as the United States, the United Kingdom, Brazil, Singapore, and China. The Ultimate Fighting Championship (UFC) is the premier organization in the MMA world. In the dynamic landscape of MMA, quantifying fighter performance is essential for both athletes and analysts. Our objective is to reveal the significance and implications of that factors that contribute to the fighters' performance. **The research questions is in what ways can MMA fighters improve their performance?**
 
 Today's data comes from UFC fighter statistics collected in 2024, encompassing various dimensions of fighter performance results and parameters. **wins**, **losses** and **draws** represent the number of a fighter's victories, dogfalls and failures throughout their career. **height_cm**, **weight_in_kg** and **reach_in_cm** quantifies fighters physical attributes. **stance** is a categorical variable including Orthodox/Southpaw/Switch, which highlights fighters' preferred combat orientation. Performance metrics such as **significant_strikes_landed_per_minute** and **significant_striking_accuracy** record fighters' precision, timing, and offensive capabilities, while **significant_strikes_absorbed_per_minute** and **significant_strike_defence** quantify their defensive skills. **takedown_accuracy** and **average_takedowns_landed_per_15_minutes** assess fighters' proficiency in executing takedowns, while **takedown_defense** shows their ability to counter opponents' takedown attempts. Lastly, **average_submissions_attempted_per_15_minutes** measures fighters' inclination towards submission-based tactics, reflecting their grappling proficiency.
 
@@ -123,6 +122,7 @@ model4 <- polr(win_ratio_group ~ age + stance + average_takedowns_landed_per_15_
                       significant_strikes_absorbed_per_minute + significant_strike_defence,
                data = ufc)
 
+
 ```
 
 ```{r ch-4, message = F, warning = F, echo = F}
@@ -186,6 +186,11 @@ Therefore, the factors which have statistically significant effect on win ratio 
 
 ## Discussion
 
-In terms of how fighters improve their performance, we can conclude that they should put more effort into improving their rates of takedowns landed, striking accuracy, striking numbers, and strikes absorbed, because these factors are predicted to be more closely associated with wins ratio. In contrast, which stance they choose and the significant strike defence do not contribute much to improve their wins ratio.
+In this section, we focus on the factors that have have statistically significant effect on win ratio groups and  examine how fighters strategize and adapt in response to these factors to enhance their overall performance. First of all, we suggest that fighters can prioritize takedown techniques during training sessions, focusing on both offensive and defensive aspects. They may develop game plans that emphasize takedowns as a means of controlling the pace of the fight and scoring points. Additionally, striking number and accuracy is predicted to be crucial to performance improvement. Applying combinations of strikes rather than single shots can potentially increase the effectiveness. Coaches may develop strategies that encourage fighters to engage in striking exchanges at opportune moments, such as when opponents are off-balance. Lastly, to reduce the number of punches absorbed, a fighter can incorporate drills focused on head movement, blocking, and evasive footwork. They can also employ clinch work or positional control to mitigate damage, allowing for brief periods of rest and recovery between striking engagements.
 
-As for limitations, the ordinal model may oversimplify the complex dynamics of MMA fights and fail to capture all relevant predictors. To improve future analyses, we could consider incorporating additional variables such as fighters' training regimens, injury history, and psychological factors. Additionally, since we only categorize the wins ratio into three groups, this may simplif the prediction task and potentially lose granularity in the data, which affects the model's ability to accurately predict the win ratios.
+
+As for limitations, since we only categorize the wins ratio into three groups, this may simplify the prediction task and potentially lose granularity in the data, which affects the model's ability to accurately predict the win ratios. We also observe that, for example, missing values (NA) in variables such as significant_strike_defence have been treated as zeros, which could potentially stem from errors in the original data. This limitation may have contributed to inaccuracies in the model results. In addition, the ordinal model may oversimplify the complex dynamics of MMA fights and fail to capture all relevant predictors. 
+
+For future analyses, we need to develop more robust strategies for handling missing data, such as multiple imputation or predictive modeling, to preserve the integrity of the dataset. Additional variables such as fighters' training regimens, injury history, and psychological factors should be incorporated to better learn about the performance outcomes. Instead of simply categorizing win ratios into just three groups, we should consider using a more granular approach with additional categories.  
+
+
