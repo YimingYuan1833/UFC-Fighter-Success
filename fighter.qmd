@@ -108,7 +108,10 @@ ggplot(correlation_data, aes(x = variable1, y = variable2, fill = value)) +
 
 
 
-**Ordinal regression model selection:** The data were fit by the ordinal logistic regression model based on model fit parameters (AIC: 3586.268) to explore the relationships between fighters' characteristics. Specifically, the response variable win_ratio is categorized into 0-0.33, 0.33-0.67, and 0.67-1, and labelled as "Low", "Medium", "High" respectively. Our analysis explore the relationships between fighters' win_ratio groups (Low, Medium, and High) and a set of predictors.
+**Ordinal regression model selection:** 
+Choosing an ordinal logistic regression model for UFC data analysis is justified when the dependent variable represents ordered categories. It provides a analytical framework to examine how various factors influence a fighter's performance category, leveraging the ordinal nature of the data effectively to produce meaningful and actionable insights. This model helps in capturing the nuances of ordered categories more accurately than other models that do not consider such order.
+
+The data were fit by the ordinal logistic regression model based on model fit parameters (AIC: 3586.268) to explore the relationships between fighters' characteristics. Specifically, the response variable win_ratio is categorized into 0-0.33, 0.33-0.67, and 0.67-1, and labelled as "Low", "Medium", "High" respectively. Our analysis explore the relationships between fighters' win_ratio groups (Low, Medium, and High) and a set of predictors.
 
 According to **Table1**, the confusion matrix shows the distribution of actual versus predicted group memberships, which ndicates that the test accuracy of this ordinal model is approximately 71%. Thus, the ordinal model can make more accurate predictions and it is feasible to find more influential predictor by ordinal model.
 
@@ -146,7 +149,6 @@ accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
 
 
 ```
-
 **Table1. Confusion Matrix and Accuracy from the Ordinal Model**
 
 |               |        | **Predicted** |        |                 |
@@ -159,7 +161,10 @@ accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
 
 
 
+
 ## Results
+
+**Table2** presents the characteristics summary of UFC fighters. More than 75% fighters reported their date of birth, and the mean age was 38.59 years. 3282/4,105 fighters have been recorded in a fighting stance type: 76.82% of the 4105 recorded fighters applied the Orthodox stance; Few fighters (0.09%) used Sideways stance, presenting a challenge for statistical modeling due to its extremely low frequency, which makes it difficult to draw reliable inferences about the effect of this stance on fight outcomes or any other dependent variables of interest.
 
 ```{r ch-5, message = F, warning = F, echo = F}
 
@@ -210,7 +215,11 @@ kable(summary_stats, format = "markdown", align = 'c')
 ```
 **Table2. Characteristics Summary of UFC Fighters**
 
-**Table2** presents the characteristics summary of UFC fighters. More than 75% fighters reported their date of birth, and the mean age was 38.59 years. 3282/4,105 fighters have been recorded in a fighting stance type: 76.82% of the 4105 recorded fighters applied the Orthodox stance; Few fighters (0.09%) used Sideways stance, presenting a challenge for statistical modeling due to its extremely low frequency, which makes it difficult to draw reliable inferences about the effect of this stance on fight outcomes or any other dependent variables of interest.
+
+Results from our ordinal regression model are presented in **Table3**. Age reported a negative coefficient (-0.115), indicating that for each one-unit increase in age, a fighter has approximately 0.8912 times the odds of being in a higher category of win ratio compared to younger fighters, assuming all other variables are held constant. Average takedowns landed per 15 minutes has a positive coefficient (0.155), suggesting that a fighter will have approximately 1.1681 times the odds of being in a higher category of win ratio, if he increases one unit in average takedowns landed per 15 minutes. Significant strike defence shows a negligible negative coefficient (-0.0007179), which is not evident to prove that it has significant effect on win ratio groups.
+
+
+The Sideways stance has a significantly positive coefficient (coef = 4.3460381), while the coefficients for other stances are all negative. However, since the absolute t-values of all stance types are less than 1.96, there is no strong evidence to reject the null hypothesis that the stance does not have significantly effect on win ratio groups.
 
 ```{r ch-6, message = F, warning = F, echo = F}
 # Extract summary of the model
@@ -232,14 +241,7 @@ kable(coefficients_table, digits = 4)
 ```
 **Table3. Independent Associations of UFC Fighters' Features With Winning Possibility**
 
-Results from our ordinal regression model are presented in **Table3**. Age reported a negative coefficient (-0.115), indicating that for each one-unit increase in age, a fighter has approximately 0.8912 times the odds of being in a higher category of win ratio compared to younger fighters, assuming all other variables are held constant. Average takedowns landed per 15 minutes has a positive coefficient (0.155), suggesting that a fighter will have approximately 1.1681 times the odds of being in a higher category of win ratio, if he increases one unit in average takedowns landed per 15 minutes. Significant strike defence shows a negligible negative coefficient (-0.0007179), which is not evident to prove that it has significant effect on win ratio groups.
-
-
-The Sideways stance has a significantly positive coefficient (coef = 4.3460381), while the coefficients for other stances are all negative. However, since the absolute t-values of all stance types are less than 1.96, there is no strong evidence to reject the null hypothesis that the stance does not have significantly effect on win ratio groups.
-
-Therefore, the factors which have statistically significant effect on win ratio groups are age, average_takedowns_landed_per_15_minutes, significant_striking_accuracy, significant_strikes_landed_per_minute, and significant_strikes_absorbed_per_minute.
-
-
+Therefore, the factors which have statistically significant effect on win ratio groups are age, average_takedowns_landed_per_15_minutes, significant_striking_accuracy, significant_strikes_landed_per_minute, and significant_strikes_absorbed_per_minute. During training, fighters need to strategically allocate their time and effort based on their strengths. They should concentrate on optimizing a combination of takedown frequency, significant striking accuracy, and significant strike frequency to achieve the necessary improvements in specific metrics. Additionally, minimizing the frequency of significant strikes absorbed is also essential for increasing their win ratio!
 
 ## Discussion
 
