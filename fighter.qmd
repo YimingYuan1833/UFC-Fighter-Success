@@ -13,6 +13,7 @@ library(dplyr)
 library(readr)
 library(MASS)
 library(kableExtra)
+library(tidyr)
 ufc <- read_csv("data/ufc-fighters-statistics.csv")
 
 # new variables 
@@ -26,11 +27,12 @@ ufc$age <- as.integer(format(Sys.Date(), "%Y")) - as.integer(format(ufc$date_of_
 
 Around 300 million individuals worldwide identify themselves as fans of Mixed Martial Arts (MMA), with its popularity peaking in nations such as the United States, the United Kingdom, Brazil, Singapore, and China. The Ultimate Fighting Championship (UFC) is the premier organization in the MMA world. In the dynamic landscape of MMA, quantifying fighter performance is essential for both athletes and analysts. Our objective is to reveal the significance and implications of that factors that contribute to the fighters' performance. **The research questions is in what ways can MMA fighters improve their performance?**
 
-Today's data comes from UFC fighter statistics collected in 2024, encompassing various dimensions of fighter performance results and parameters. **wins**, **losses** and **draws** represent the number of a fighter's victories, dogfalls and failures throughout their career. **height_cm**, **weight_in_kg** and **reach_in_cm** quantifies fighters physical attributes. **stance** is a categorical variable including Orthodox/Southpaw/Switch, which highlights fighters' preferred combat orientation. Performance metrics such as **significant_strikes_landed_per_minute** and **significant_striking_accuracy** record fighters' precision, timing, and offensive capabilities, while **significant_strikes_absorbed_per_minute** and **significant_strike_defence** quantify their defensive skills. **takedown_accuracy** and **average_takedowns_landed_per_15_minutes** assess fighters' proficiency in executing takedowns, while **takedown_defense** shows their ability to counter opponents' takedown attempts. Lastly, **average_submissions_attempted_per_15_minutes** measures fighters' inclination towards submission-based tactics, reflecting their grappling proficiency.
+Today's data is scraped from UFC fighter statistics collected in 2024, encompassing various dimensions of fighter performance results and parameters. **wins**, **losses** and **draws** represent the number of a fighter's victories, dogfalls and failures throughout their career. **height_cm**, **weight_in_kg** and **reach_in_cm** quantifies fighters physical attributes. **stance** is a categorical variable including Orthodox/Southpaw/Switch, which highlights fighters' preferred combat orientation. Performance metrics such as **significant_strikes_landed_per_minute** and **significant_striking_accuracy** record fighters' precision, timing, and offensive capabilities, while **significant_strikes_absorbed_per_minute** and **significant_strike_defence** quantify their defensive skills. **takedown_accuracy** and **average_takedowns_landed_per_15_minutes** assess fighters' proficiency in executing takedowns, while **takedown_defense** shows their ability to counter opponents' takedown attempts. Lastly, **average_submissions_attempted_per_15_minutes** measures fighters' inclination towards submission-based tactics, reflecting their grappling proficiency.
 
 We add two new variables: **win_ratio** is calculated as the ratio of wins to the sum of wins, draws, and losses, offering a measure of a fighter's success rate; and **age** is derived from fighters' date_of_birth statistics, providing insight into the fighters' maturity and experience within the competitive landscape.
 
-Figure 1. visualizes the distribution of fighters' striking and takedowns metrics.
+**Figure1** visualizes key performance metrics for UFC fighters encompassing both of the takedown and striking capabilities. The interquartile range (IQR) being narrow indicates that for most of the fighters, the number of successful attempts per 15 minutes is fairly consistent, while the wide outliers shows that some fighters are exceptionally good at takedowns, far exceeding the typical fighter. The number of strikes landed does not vary as widely as striking accuracy, which implies that most fighters have strikes landed frequency that are relatively close together. The defensive metrics help in understanding how fighters manage incoming attacks: A narrow box in significant strikes absorbed/min could indicate that most fighters receive a similar rate of hits, whereas variations in strike defense might show different defensive skill levels.Recognizing patterns and outliers in these metrics enables us to refine our predictive models for fight outcomes, focusing on statistical evidence to enhance the accuracy of predictions.
+
 
 ```{r ch-1, message = F, warning = F, echo=F}
 
@@ -57,10 +59,12 @@ p <- ggplot(melted_ufc, aes(x = Statistic, y = Value, fill = Statistic)) +
 
 print(p)
 ```
-**Figure 1. Box Plots of Fighting Statistics**
+**Figure 1. Distribution of Fighters' Striking and Takedowns Metrics**
 
 
 **sources:**
+
+http://ufcstats.com/statistics/fighters
 
 https://www.kaggle.com/datasets/aaronfriasr/ufc-fighters-statistics?resource=download
 
@@ -153,13 +157,62 @@ accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix)
 |               |   High | 0             |    191 |            1858 |
 | **Accuracy:** |        |               |        | 0.7093413978495 |
 
+
+
 ## Results
 
-
-
-**Table2. Characteristics of UFC Fighters with Ordinal Model**
-
 ```{r ch-5, message = F, warning = F, echo = F}
+
+ufc_sub <- dplyr::select(ufc,
+    win_ratio,
+    age,
+    average_takedowns_landed_per_15_minutes,
+    significant_striking_accuracy,
+    significant_strikes_landed_per_minute,
+    significant_strikes_absorbed_per_minute,
+    significant_strike_defence
+  )
+
+summary_sub <- summary(ufc_sub)
+
+stats_table <- t(summary_sub)
+colnames(stats_table) <- c("Min.", "1st Qu.", "Median", "Mean", "3rd Qu.", "Max.", "NA's")
+
+# Use kable to create a nicely formatted table
+#kable(stats_table, format = "html", caption = "Summary Statistics of UFC Dataset")
+
+
+# Count NA values in the Stance column
+na_count <- sum(is.na(ufc$stance))
+
+# Calculate the proportions of each stance excluding NA values
+stance_table <- table(ufc$stance, useNA = "no")
+stance_proportions <- prop.table(stance_table)
+
+# Print the NA count and the proportions
+#print(paste("Number of NA values in Stance column:", na_count))
+#print("Proportions of each stance:")
+#print(stance_proportions)
+
+summary_stats <- data.frame(
+  Variable = c("Win Ratio", "Age", "Average Takedowns Landed per 15 Minutes",
+               "Significant Striking Accuracy", "Significant Strikes Landed per Minute",
+               "Significant Strikes Absorbed per Minute", "Significant Strike Defence", "", "Stance"),
+  Min = c(0.0000, 20.00, 0.000, 0.00, 0.000, 0.000, 0.00, "Orthodox", "76.82%"),
+  Median = c(0.6875, 38.00, 0.590, 40.00, 2.330, 2.940, 50.00, "Sideways", "0.09%"),
+  Mean = c(0.6607, 38.59, 1.251, 35.54, 2.438, 3.145, 42.64,  "Southpaw", "17.03%"),
+  Max = c(1.0000, 81.00, 32.140, 100.00, 17.650, 52.500, 100.00,  "Switch", "5.84%"),
+  NA_s = c(19, 1135, 0, 0, 0, 0, 0,  " ", 823)
+)
+
+# Print the table in a markdown format using knitr
+kable(summary_stats, format = "markdown", align = 'c')
+```
+**Table2. Characteristics Summary of UFC Fighters**
+
+**Table2** presents the characteristics summary of UFC fighters. More than 75% fighters reported their date of birth, and the mean age was 38.59 years. 3282/4,105 fighters have been recorded in a fighting stance type: 76.82% of the 4105 recorded fighters applied the Orthodox stance; Few fighters (0.09%) used Sideways stance, presenting a challenge for statistical modeling due to its extremely low frequency, which makes it difficult to draw reliable inferences about the effect of this stance on fight outcomes or any other dependent variables of interest.
+
+```{r ch-6, message = F, warning = F, echo = F}
 # Extract summary of the model
 summary_model <- summary(model4)
 
@@ -177,12 +230,16 @@ coefficients_table <- data.frame(
 kable(coefficients_table, digits = 4)
 
 ```
-Results from our ordinal regression model are presented in **Table2**. Age reported a negative coefficient (-0.115), indicating that for each one-unit increase in age, a fighter has approximately 0.8912 times the odds of being in a higher category of win ratio compared to younger fighters, assuming all other variables are held constant. Average takedowns landed per 15 minutes has a positive coefficient (0.155), suggesting that a fighter will have approximately 1.1681 times the odds of being in a higher category of win ratio, if he increases one unit in average takedowns landed per 15 minutes. Significant strike defence shows a negligible negative coefficient (-0.0007179), which is not evident to prove that it has significant effect on win ratio groups.
+**Table3. Independent Associations of UFC Fighters' Features With Winning Possibility**
+
+Results from our ordinal regression model are presented in **Table3**. Age reported a negative coefficient (-0.115), indicating that for each one-unit increase in age, a fighter has approximately 0.8912 times the odds of being in a higher category of win ratio compared to younger fighters, assuming all other variables are held constant. Average takedowns landed per 15 minutes has a positive coefficient (0.155), suggesting that a fighter will have approximately 1.1681 times the odds of being in a higher category of win ratio, if he increases one unit in average takedowns landed per 15 minutes. Significant strike defence shows a negligible negative coefficient (-0.0007179), which is not evident to prove that it has significant effect on win ratio groups.
 
 
 The Sideways stance has a significantly positive coefficient (coef = 4.3460381), while the coefficients for other stances are all negative. However, since the absolute t-values of all stance types are less than 1.96, there is no strong evidence to reject the null hypothesis that the stance does not have significantly effect on win ratio groups.
 
 Therefore, the factors which have statistically significant effect on win ratio groups are age, average_takedowns_landed_per_15_minutes, significant_striking_accuracy, significant_strikes_landed_per_minute, and significant_strikes_absorbed_per_minute.
+
+
 
 ## Discussion
 
